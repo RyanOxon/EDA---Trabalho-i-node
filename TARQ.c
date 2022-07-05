@@ -160,7 +160,6 @@ TARVB *TARVB_insere_nodes(TARVB *T, int t){
   fgets(entry, MAX_ENTRY_SZ, stdin);
   if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
     entry[strlen(entry)-1]= '\0';
-  printf(entry);
   int size_txt = strlen(entry);
   TARQ *ant = TARQ_aloca();
   TARQ *novo;

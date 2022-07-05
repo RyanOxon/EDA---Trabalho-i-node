@@ -1,7 +1,11 @@
 #include "TARVB.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[]){
   TARVB *arvore = TARVB_Inicializa();
+  TBND *nodeTab = TBND_Inicializa();
   int t;
   char *texto;
   printf("Digite o grau minimo. Se o valor digitado for menor que 2, t sera considerado igual a 2...\n");
@@ -27,11 +31,15 @@ int main(int argc, char *argv[]){
       TARVB_Imprime(arvore);
     }
     else if (num == 1) {
-      arvore = TARVB_insere_nodes(arvore, t);
-      //scanf ( "\n%[^\n]", texto);
-      //printf(texto);
-      //arvore = TARVB_insere_manual(arvore, t, texto);
-      //printf("\n> id: %d \n", arvore->info[0]->id); 
+      printf("Digite o nome do Node:");
+      char nome[32];
+      scanf("%s", &nome);
+      while(TBND_busca_nome(nodeTab, nome)){
+        printf("Nome ja existente, escolha outro nome: (Aperte enter para voltar)");
+        scanf("%s", &nome);
+        if(strcmp(nome,'\0')) break;
+      }
+      arvore = TARVB_insere_novo_node(arvore, t, nodeTab, nome); 
     }
     printf("\n\n");
   }

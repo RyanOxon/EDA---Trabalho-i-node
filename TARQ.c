@@ -4,6 +4,19 @@
 #include <stdint.h>
 
 
+TBND *TBND_Inicializa(){
+  return NULL;
+}
+
+TBND *TBND_insere(TBND *A, TARQ *N){
+    TBND *novo = (TBND*)malloc(sizeof(TBND));
+    novo->node = N;
+    novo->nome = N->nome;
+    novo->prox = A;
+    printf("inseri um node na tabela \n");
+    return novo;
+}
+
 TARVB *TARVB_Cria(int t){
   TARVB* novo = (TARVB*)malloc(sizeof(TARVB));
   novo->nchaves = 0;
@@ -30,9 +43,7 @@ TARVB *TARVB_Libera(TARVB *a){
 }
 
 void imp_rec(TARVB *a, int andar){
-  //printf("entrei info = %d", a->info[0]->id);
   if(a){
-    //printf("pronto para imprimir");
     int i,j;
     TARQ *A;
     for(i=0; i<=a->nchaves-1; i++){
@@ -47,6 +58,16 @@ void imp_rec(TARVB *a, int andar){
 
 void TARVB_Imprime(TARVB *a){
   imp_rec(a, 0);
+}
+
+TBND *TBND_busca_nome(TBND *tab, char *nome){
+  printf("buscando...\n");
+  if(!tab){
+    printf("tabela vazia\n");
+    return tab;
+  }
+  if (strcmp(tab->nome, nome)) return tab;
+  return TBND_busca_nome(tab->prox, nome);
 }
 
 TARVB *TARVB_Busca(TARVB* x, int ch){
@@ -64,7 +85,6 @@ TARVB *TARVB_Inicializa(){
 
 TARQ *TARQ_aloca(){
   TARQ *novo = (TARQ*)malloc(sizeof(TARQ));
-  //printf("aloquei um novo node!");
   return novo;
 }
 
@@ -154,14 +174,14 @@ TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N){
   return T;
 }
 
-TARVB *TARVB_insere_nodes(TARVB *T, int t){
+TARVB *TARVB_insere_novo_node(TARVB *T, int t, TBND *tab, char *nome){
   char *entry = malloc(MAX_ENTRY_SZ);
   fflush(stdin);
   fgets(entry, MAX_ENTRY_SZ, stdin);
   if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
     entry[strlen(entry)-1]= '\0';
   int size_txt = strlen(entry);
-  TARQ *ant = TARQ_aloca();
+  TARQ *ant = NULL;
   TARQ *novo;
   int id;
   for(int i=0; i<size_txt; i+=(CHAR_TXT-1)){
@@ -173,39 +193,18 @@ TARVB *TARVB_insere_nodes(TARVB *T, int t){
     }
     novo->texto[CHAR_TXT-1] = '\0';
     novo->id = Maior_id(T)+1;
-    if(ant) 
+    novo->prox_id = -1;
+    if(!ant){
+      ant = TARQ_aloca();
+      ant = novo;
+      tab = TBND_insere(tab, novo);
+    } else if(ant) 
       ant->prox_id = novo->id;
     printf(".....\n");
-    novo->prox_id = -1;
     T = TARVB_Insere(T, novo->id, t, novo);
     printf("Adicionado na arvore > id: %d\n", novo->id);
     printf("A info = %s\n", novo->texto);
-    ant = novo;
-  }
-  return T;
-}
-
-TARVB *TARVB_insere_manual(TARVB *T, int t, char *txt){
-  int size_txt = strlen(txt);
-  TARQ *ant = TARQ_aloca();
-  TARQ *novo;
-  int id;
-  for(int i=0; i<size_txt; i+=(CHAR_TXT-1)){
-    novo = TARQ_aloca();
-    for(int j=0; j<(CHAR_TXT-1); j++){
-      if((i+j) < size_txt){
-        novo->texto[j] = txt[i+j];
-      } else novo->texto[j] = ' ';
-    } novo->texto[CHAR_TXT+1] = '\0';
-    novo->id = Maior_id(T)+1;
-    if(ant) 
-      ant->prox_id = novo->id;
-    printf(".....\n");
-    novo->prox_id = -1;
-    T = TARVB_Insere(T, novo->id, t, novo);
-    printf("Adicionado na arvore > id: %d\n", novo->id);
-    printf("A info = %s\n", novo->texto);
-    ant = novo;
+    
   }
   return T;
 }

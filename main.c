@@ -5,7 +5,8 @@
 
 int main(int argc, char *argv[]){
   TARVB *arvore = TARVB_Inicializa();
-  TBND *nodeTab = TBND_Inicializa();
+  TH tab;
+  TH_inicializa(tab, TAB_SZ);
   int t;
   char *texto;
   printf("Digite o grau minimo. Se o valor digitado for menor que 2, t sera considerado igual a 2...\n");
@@ -13,34 +14,56 @@ int main(int argc, char *argv[]){
   if(t < 2) t = 2;
   int num = 0, from, to;
   while(num != -1){
-    printf("Digite 1 para adicionar um novo texto. 0 para imprimir. e -1 para sair\n");
+    printf("...::MENU DO USUARIO::...\n");
+    printf("NUM [-1] > Encerra o programa\n");
+    printf("NUM [ 0] > Salvar iNodes em arquivos de texto\n");
+    printf("NUM [ 1] > Adicionar novo inode com o teclado\n");
+    printf("NUM [ 2] > Imprimir tabela de inodes\n");
+    printf("NUM [ 3] > Imprimir Arvore Binaria\n");
+    printf("NUM [-9] > Remover um inode\n");
+    printf(".......:::::::::::.......\n");
     scanf("%d", &num);
-    if(num == -9){
+    printf("\n\n\n\n");
+    if(num == -9){ // Remover da arvore
       //scanf("%d", &from);
       //arvore = TARVB_Retira(arvore, from, t);
       TARVB_Imprime(arvore);
     }
-    else if(num == -1){
+    else if(num == -1){ //Encerrar
       printf("\n");
       TARVB_Imprime(arvore);
       TARVB_Libera(arvore);
+      printf("\n\n");
       return 0;
     }
     else if(!num){
       printf("\n");
+      TARVB_Salva(arvore, tab);
+    }
+    else if(num == 3){ // caso 3 => impressao da arvore
+      printf("\n");
       TARVB_Imprime(arvore);
     }
-    else if (num == 1) {
+    else if (num == 1) { // Insercao de novo nó sem arquivo
       printf("Digite o nome do Node:");
-      char nome[32];
-      scanf("%s", &nome);
-      while(TBND_busca_nome(nodeTab, nome)){
-        printf("Nome ja existente, escolha outro nome: (Aperte enter para voltar)");
-        scanf("%s", &nome);
-        if(strcmp(nome,'\0')) break;
+      char nome[MAX_ARQ_SZ];
+      scanf("%s", nome);
+      if(TH_busca_nome(tab, nome))
+        printf("Erro, nome de node ja existente");
+      else {
+        printf("Digite o texto a ser inserido:\n");
+        char *entry = malloc(MAX_ENTRY_SZ);
+        fflush(stdin);
+        fgets(entry, MAX_ENTRY_SZ, stdin);
+        if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
+          entry[strlen(entry)-1]= '\0';
+        arvore = TARVB_insere_novo_node(arvore, t, tab, nome, entry);
       }
-      arvore = TARVB_insere_novo_node(arvore, t, nodeTab, nome); 
     }
-    printf("\n\n");
+    else if(num == 2){ // imprimir tabela de inodes
+      printf("\n");
+      TH_imprime(tab);
+    }
+    printf("\n\n\n\n");
   }
 }

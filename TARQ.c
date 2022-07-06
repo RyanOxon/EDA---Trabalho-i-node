@@ -4,17 +4,38 @@
 #include <stdint.h>
 
 
-TBND *TBND_Inicializa(){
-  return NULL;
+void TH_inicializa(TH tab, int n){
+  int i;
+  for(i = 0; i < n; i++)tab[i] = NULL;
 }
 
-TBND *TBND_insere(TBND *A, TARQ *N){
-    TBND *novo = (TBND*)malloc(sizeof(TBND));
-    novo->node = N;
-    novo->nome = N->nome;
-    novo->prox = A;
-    printf("inseri um node na tabela \n");
-    return novo;
+TARQ* TH_busca_nome(TH tab, char nome[MAX_ARQ_SZ]){
+  int i = 0;
+  while(tab[i]){
+    if(strcmp(tab[i]->nome, nome))
+      i++;
+    else break;
+  }
+  return tab[i];
+}
+
+void TH_insere(TH tab, TARQ *N){
+  int i=0;
+  while(tab[i]) i++;
+  tab[i] = (TARQ*)malloc(sizeof(TARQ));
+  tab[i] = N;
+}
+
+void TH_imprime(TH tab){
+  int i=0;
+  printf("___________TABELA_INODE___________\n");
+  while(tab[i]){
+    if(tab[i]->prox_id==-1)
+      printf("[%d] | ID: %d | ID_Proximo:%d | Nome: %s\n", i, tab[i]->id, tab[i]->prox_id, tab[i]->nome);
+    else printf("[%d] | ID: %d | ID_Proximo: %d | Nome: %s\n", i, tab[i]->id, tab[i]->prox_id, tab[i]->nome);
+    i++;
+  } 
+  printf("__________________________________\n");
 }
 
 TARVB *TARVB_Cria(int t){
@@ -60,16 +81,6 @@ void TARVB_Imprime(TARVB *a){
   imp_rec(a, 0);
 }
 
-TBND *TBND_busca_nome(TBND *tab, char *nome){
-  printf("buscando...\n");
-  if(!tab){
-    printf("tabela vazia\n");
-    return tab;
-  }
-  if (strcmp(tab->nome, nome)) return tab;
-  return TBND_busca_nome(tab->prox, nome);
-}
-
 TARVB *TARVB_Busca(TARVB* x, int ch){
   if(!x) return NULL;
   int i = 0;
@@ -90,18 +101,20 @@ TARQ *TARQ_aloca(){
 
 int Maior_id(TARVB *T){
   int num;
-  if(!T){
+  if(!T)
     return 0;
-  }
   int i = T->nchaves;
-  if(!T->folha){
+  if(!T->folha)
     if(T->filho[i]) 
       return Maior_id(T->filho[i]);
     if(T->filho[i-1])
       return Maior_id(T->filho[i-1]);
-  }
 
   return T->info[i-1]->id;
+}
+
+void TARVB_Salva(TARVB *a, TH tab){
+  
 }
 
 TARVB *Divisao(TARVB *x, int i, TARVB* y, int t){ //S=x ; T=y
@@ -153,12 +166,14 @@ TARVB *Insere_Nao_Completo(TARVB *x, int k, int t, TARQ *N){ // ARVB = x, k = id
 }
 
 TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N){
+  printf(".\n");
   if(TARVB_Busca(T,k)) return T;
+  printf(".\n");
   if(!T){ // 1CASO
     T=TARVB_Cria(t);
     T->info[0] = N;
-    N->pai = (int)T;
     T->nchaves=1;
+    printf(".\n");
     return T;
   }
   if(T->nchaves == (2*t)-1){ //CASO NCHAVE CHEIO
@@ -174,36 +189,32 @@ TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N){
   return T;
 }
 
-TARVB *TARVB_insere_novo_node(TARVB *T, int t, TBND *tab, char *nome){
-  char *entry = malloc(MAX_ENTRY_SZ);
-  fflush(stdin);
-  fgets(entry, MAX_ENTRY_SZ, stdin);
-  if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
-    entry[strlen(entry)-1]= '\0';
+TARVB *TARVB_insere_novo_node(TARVB *T, int t, TH tab, char nome[MAX_ARQ_SZ], char *entry){
   int size_txt = strlen(entry);
   TARQ *ant = NULL;
   TARQ *novo;
   int id;
-  for(int i=0; i<size_txt; i+=(CHAR_TXT-1)){
+  for(int i=0; i<size_txt; i+=(CHAR_SZ-1)){
     novo = TARQ_aloca();
-    for(int j=0; j<(CHAR_TXT-1); j++){
+    for(int j=0; j<(CHAR_SZ-1); j++){
       if((i+j) < size_txt){
         novo->texto[j] = entry[i+j];
       } else novo->texto[j] = ' ';
     }
-    novo->texto[CHAR_TXT-1] = '\0';
+    novo->texto[CHAR_SZ-1] = '\0';
     novo->id = Maior_id(T)+1;
     novo->prox_id = -1;
-    if(!ant){
-      ant = TARQ_aloca();
-      ant = novo;
-      tab = TBND_insere(tab, novo);
-    } else if(ant) 
+    strcpy(novo->nome, nome);
+    printf(".\n");
+    if(!ant)
+      TH_insere(tab, novo);
+    else if(ant) 
       ant->prox_id = novo->id;
-    printf(".....\n");
+    ant = novo;
+    printf(".\n");
     T = TARVB_Insere(T, novo->id, t, novo);
     printf("Adicionado na arvore > id: %d\n", novo->id);
-    printf("A info = %s\n", novo->texto);
+    printf("Info = %s\n", novo->texto);
     
   }
   return T;

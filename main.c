@@ -38,7 +38,11 @@ int main(int argc, char *argv[]){
     }
     else if(!num){
       printf("\n");
-      TARVB_Salva(arvore, tab);
+      printf("Digite o nome do node a ser salvo\n");
+      char snome[MAX_ARQ_SZ];
+      scanf("%s", snome);
+      if(TH_busca_nome(tab, snome))
+        Salva_Node(arvore, tab, snome);
     }
     else if(num == 3){ // caso 3 => impressao da arvore
       printf("\n");

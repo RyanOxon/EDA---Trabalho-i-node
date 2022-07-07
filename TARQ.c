@@ -151,7 +151,6 @@ TARVB *Insere_Nao_Completo(TARVB *x, int k, int t, TARQ *N){ // ARVB = x, k = id
       i--;
     }
     x->info[i+1] = N;
-    N->pai = (int)x->pai;
     x->nchaves++;
     return x; // CASO FOLHA
   }
@@ -208,8 +207,10 @@ TARVB *TARVB_insere_novo_node(TARVB *T, int t, TH tab, char nome[MAX_ARQ_SZ], ch
     printf(".\n");
     if(!ant)
       TH_insere(tab, novo);
-    else if(ant) 
+    else if(ant){ 
       ant->prox_id = novo->id;
+      novo->pai = ant->id;
+    }
     ant = novo;
     printf(".\n");
     T = TARVB_Insere(T, novo->id, t, novo);
@@ -220,25 +221,20 @@ TARVB *TARVB_insere_novo_node(TARVB *T, int t, TH tab, char nome[MAX_ARQ_SZ], ch
   return T;
 }
 
-TARVB *TARVB_Insere_ARQ(TARVB *T, int t, char *arq){
-  FILE *fp = fopen(arq, "rb+");
-  if(!fp){
-    printf("Erro na abertura do arquivo\n");
-    exit(1);}
-  int pos;
-  fseek(fp, 0, SEEK_SET);
-  TARQ *novo = TARQ_aloca();
-  TARQ *ant;
-  while(fread(novo, sizeof(TARQ), 1, fp) != EOF){
-    if(!TARVB_Busca(T, novo->id)){
-      T = TARVB_Insere(T, novo->id, t, novo);
-      ant = novo;
-      novo = TARQ_aloca();
-    } 
-    else printf("Erro no arquivo, Encontrado uma ID repetida. Pulando a insecao da id: %d \n", novo->id);
+void Salva_Node(TARVB *T, TH tab, char *nome){
+  int i =0;
+  while(strcmp(tab[i]->nome, nome)){
+      i++;
+    if(!tab[i])
+      return;
   }
-  fclose(fp);
-  return T;
+  char nArq[101] = ".txt";
+  strcat(nome,nArq);
+  printf(nome);
+  //FILE *fp;
+  
+
+  
 }
 
 void Limpa_Remocao(TARVB *a){

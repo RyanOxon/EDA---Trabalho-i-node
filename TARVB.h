@@ -9,9 +9,8 @@
 
 typedef struct iNode{
   char nome[MAX_ARQ_SZ];
-  int id, pai; 
+  int id, pai, prox_id; 
   char texto[CHAR_SZ];
-  int prox_id;
 }TARQ;
 
 typedef struct ArvB{
@@ -37,5 +36,5 @@ TARVB *TARVB_Busca(TARVB *x, int ch);
 TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N);
 //TARVB *TARVB_Retira(TARVB *arv, int k, int t);
 void TARVB_Imprime(TARVB *a);
-void TARVB_Salva(TARVB *a, TH tab);
+void Salva_Node(TARVB *a, TH tab, char *nome);
 

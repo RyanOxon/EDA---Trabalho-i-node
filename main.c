@@ -16,10 +16,10 @@ int main(int argc, char *argv[]){
   while(num != -1){
     printf("...::MENU DO USUARIO::...\n");
     printf("NUM [-1] > Encerra o programa\n");
-    printf("NUM [ 0] > Salvar iNodes em arquivos de texto\n");
     printf("NUM [ 1] > Adicionar novo inode com o teclado\n");
     printf("NUM [ 2] > Imprimir tabela de inodes\n");
     printf("NUM [ 3] > Imprimir Arvore Binaria\n");
+    printf("NUM [ 4] > Salvar iNodes em arquivos de texto\n");    
     printf("NUM [-9] > Remover um inode\n");
     printf(".......:::::::::::.......\n");
     scanf("%d", &num);
@@ -36,22 +36,26 @@ int main(int argc, char *argv[]){
       printf("\n\n");
       return 0;
     }
-    else if(!num){
+    else if(num == 4){
       printf("\n");
       printf("Digite o nome do node a ser salvo\n");
       char snome[MAX_ARQ_SZ];
       scanf("%s", snome);
-      if(TH_busca_nome(tab, snome))
+      printf("\n");
+      if(TH_busca_nome(tab, snome)){
+        //printf("nchaves = %d\n", arvore->nchaves);
         Salva_Node(arvore, tab, snome);
+      } else printf("Nao existe nenhum inode com esse nome, verifique na tabela de inodes\n\n");
     }
     else if(num == 3){ // caso 3 => impressao da arvore
       printf("\n");
       TARVB_Imprime(arvore);
     }
     else if (num == 1) { // Insercao de novo nó sem arquivo
-      printf("Digite o nome do Node:");
+      printf("Digite o nome do Node:\n");
       char nome[MAX_ARQ_SZ];
       scanf("%s", nome);
+      printf("\n");
       if(TH_busca_nome(tab, nome))
         printf("Erro, nome de node ja existente");
       else {
@@ -61,6 +65,7 @@ int main(int argc, char *argv[]){
         fgets(entry, MAX_ENTRY_SZ, stdin);
         if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
           entry[strlen(entry)-1]= '\0';
+        printf("\n");
         arvore = TARVB_insere_novo_node(arvore, t, tab, nome, entry);
       }
     }

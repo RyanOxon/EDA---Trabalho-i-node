@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
+
 
 #define TAB_SZ 101
-#define CHAR_SZ 9
+#define CHAR_SZ 11
 #define MAX_ENTRY_SZ 256
-#define MAX_ARQ_SZ 33
+#define MAX_ARQ_SZ 64
 
 typedef struct iNode{
   char nome[MAX_ARQ_SZ];
@@ -27,6 +27,7 @@ void TH_inicializa(TH tab, int m);
 void TH_imprime(TH tab);
 
 TARQ* TH_busca_nome(TH tab, char nome[MAX_ARQ_SZ]);
+TARQ *TARQ_busca(TARVB *x, int ch);
 
 TARVB *TARVB_insere_novo_node(TARVB *T, int t, TH tab, char nome[MAX_ARQ_SZ], char *entry);
 TARVB *TARVB_Inicializa();

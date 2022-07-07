@@ -1,7 +1,6 @@
 #include "TARVB.h"
 #include <string.h>
 #include <stdio.h>
-#include <stdint.h>
 
 
 void TH_inicializa(TH tab, int n){
@@ -90,6 +89,16 @@ TARVB *TARVB_Busca(TARVB* x, int ch){
   return TARVB_Busca(x->filho[i], ch);
 }
 
+TARQ *TARQ_busca(TARVB *x, int ch){
+  if(!x || ch == -1) return NULL;
+  int i = 0;
+  while(i < x->nchaves && ch > x->info[i]->id) i++;
+  if(i < x->nchaves && ch == x->info[i]->id) return x->info[i];
+  if(x->folha)
+   return NULL;
+  return TARQ_busca(x->filho[i], ch);
+}
+
 TARVB *TARVB_Inicializa(){
   return NULL;
 }
@@ -111,10 +120,6 @@ int Maior_id(TARVB *T){
       return Maior_id(T->filho[i-1]);
 
   return T->info[i-1]->id;
-}
-
-void TARVB_Salva(TARVB *a, TH tab){
-  
 }
 
 TARVB *Divisao(TARVB *x, int i, TARVB* y, int t){ //S=x ; T=y
@@ -171,8 +176,7 @@ TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N){
   if(!T){ // 1CASO
     T=TARVB_Cria(t);
     T->info[0] = N;
-    T->nchaves=1;
-    printf(".\n");
+    T->nchaves= 1;
     return T;
   }
   if(T->nchaves == (2*t)-1){ //CASO NCHAVE CHEIO
@@ -222,19 +226,29 @@ TARVB *TARVB_insere_novo_node(TARVB *T, int t, TH tab, char nome[MAX_ARQ_SZ], ch
 }
 
 void Salva_Node(TARVB *T, TH tab, char *nome){
+  char nArq[MAX_ARQ_SZ];
+  strcpy(nArq,nome);
+  strcat(nArq,".txt");
   int i =0;
+  char texto[10];
   while(strcmp(tab[i]->nome, nome)){
       i++;
     if(!tab[i])
       return;
   }
-  char nArq[101] = ".txt";
-  strcat(nome,nArq);
-  printf(nome);
-  //FILE *fp;
-  
-
-  
+  //char nArq[5] = ".txt";
+  //strcat(nome,nArq);
+  printf("Preparando para salvar no arquivo %s\n", nArq);
+  FILE *fp = fopen(nArq, "w");
+  TARQ *node = tab[i];
+  while(node){
+    strcpy(texto,node->texto);
+    fwrite(texto,1,strlen(texto),fp);
+    node = TARQ_busca(T, node->prox_id);
+    printf(".\n");
+  }
+  fclose(fp);
+  printf("Salvo\n");
 }
 
 void Limpa_Remocao(TARVB *a){

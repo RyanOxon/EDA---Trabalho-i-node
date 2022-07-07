@@ -5,10 +5,9 @@
 
 int main(int argc, char *argv[]){
   TARVB *arvore = TARVB_Inicializa();
-  TH tab;
+  TL *tab = TL_init();
   TH_inicializa(tab, TAB_SZ);
   int t;
-  char *texto;
   printf("Digite o grau minimo. Se o valor digitado for menor que 2, t sera considerado igual a 2...\n");
   scanf("%d", &t);
   if(t < 2) t = 2;
@@ -33,7 +32,7 @@ int main(int argc, char *argv[]){
       printf("\n");
       TARVB_Imprime(arvore);
       TARVB_Libera(arvore);
-      printf("\n\n");
+      printf("\nPrograma encerrado\n");
       return 0;
     }
     else if(num == 4){
@@ -43,9 +42,9 @@ int main(int argc, char *argv[]){
       scanf("%s", snome);
       printf("\n");
       if(TH_busca_nome(tab, snome)){
-        //printf("nchaves = %d\n", arvore->nchaves);
+        printf("nchaves = %d\n", arvore->nchaves);
         Salva_Node(arvore, tab, snome);
-      } else printf("Nao existe nenhum inode com esse nome, verifique na tabela de inodes\n\n");
+      } else printf("Nao existe nenhum inode com esse nome, verifique na tabela de inodes\n\n");*/
     }
     else if(num == 3){ // caso 3 => impressao da arvore
       printf("\n");

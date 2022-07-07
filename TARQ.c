@@ -29,9 +29,9 @@ void TH_imprime(TH tab){
   int i=0;
   printf("___________TABELA_INODE___________\n");
   while(tab[i]){
-    if(tab[i]->prox_id==-1)
-      printf("[%d] | ID: %d | ID_Proximo:%d | Nome: %s\n", i, tab[i]->id, tab[i]->prox_id, tab[i]->nome);
-    else printf("[%d] | ID: %d | ID_Proximo: %d | Nome: %s\n", i, tab[i]->id, tab[i]->prox_id, tab[i]->nome);
+    if(tab[i]->prox_id==NULL)
+      printf("[%d] | ID: %d | ID_Proximo: -1 | Nome: %s\n", i, tab[i]->id, tab[i]->prox_id->id, tab[i]->nome);
+    else printf("[%d] | ID: %d | ID_Proximo: %d | Nome: %s\n", i, tab[i]->id, tab[i]->prox_id->id, tab[i]->nome);
     i++;
   } 
   printf("__________________________________\n");
@@ -53,7 +53,11 @@ TARVB *TARVB_Libera(TARVB *a){
   if(a){
     if(!a->folha){
       int i;
-      for(i = 0; i <= a->nchaves; i++) TARVB_Libera(a->filho[i]);
+      for(i = 0; i <= a->nchaves; i++){
+       TARVB_Libera(a->filho[i]);
+       if(i!= a->nchaves)
+        free(a->info[i]);
+      }
     }
     free(a->info);
     free(a->filho);
@@ -101,6 +105,17 @@ TARQ *TARQ_busca(TARVB *x, int ch){
 
 TARVB *TARVB_Inicializa(){
   return NULL;
+}
+
+TL *TL_init(){
+  TL *novo = (TL*)malloc(sizeof(TL));
+  novo->prim = NULL;
+  return novo;
+}
+
+void TL_insere(TL *l, ND *N){
+  N->prox = l->prim;
+  l->prim = N;
 }
 
 TARQ *TARQ_aloca(){
@@ -192,7 +207,7 @@ TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N){
   return T;
 }
 
-TARVB *TARVB_insere_novo_node(TARVB *T, int t, TH tab, char nome[MAX_ARQ_SZ], char *entry){
+TARVB *TARVB_insere_novo_node(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ], char *entry){
   int size_txt = strlen(entry);
   TARQ *ant = NULL;
   TARQ *novo;
@@ -206,14 +221,14 @@ TARVB *TARVB_insere_novo_node(TARVB *T, int t, TH tab, char nome[MAX_ARQ_SZ], ch
     }
     novo->texto[CHAR_SZ-1] = '\0';
     novo->id = Maior_id(T)+1;
-    novo->prox_id = -1;
+    novo->prox_id = NULL;
     strcpy(novo->nome, nome);
     printf(".\n");
     if(!ant)
-      TH_insere(tab, novo);
+      TL_insere(tab, novo);
     else if(ant){ 
-      ant->prox_id = novo->id;
-      novo->pai = ant->id;
+      ant->prox_id = novo;
+      novo->pai = ant;
     }
     ant = novo;
     printf(".\n");
@@ -244,7 +259,7 @@ void Salva_Node(TARVB *T, TH tab, char *nome){
   while(node){
     strcpy(texto,node->texto);
     fwrite(texto,1,strlen(texto),fp);
-    node = TARQ_busca(T, node->prox_id);
+    node = TARQ_busca(T, node->prox_id->id);
     printf(".\n");
   }
   fclose(fp);
@@ -256,4 +271,3 @@ void Limpa_Remocao(TARVB *a){
   int i;
   for(i = 0; i <= a->nchaves; i++) a->filho[i] = NULL;
 }
-

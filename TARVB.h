@@ -1,16 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-#define TAB_SZ 124 //TLSE **inode;
+#include <string.h>
 
 #define MAX_ENTRY_SZ 1024 //Tamanho maximo da entrada de texto pelo teclado
-#define CHAR_SZ 16 //Tamanho do recorte
+#define CHAR_SZ 11 //Tamanho do recorte
 #define MAX_ARQ_SZ 64 //Tamanho maximo do Nome do arquivo 
 
 typedef struct Info{
   char nome[MAX_ARQ_SZ];
   int id; 
-  struct Info *pai, *prox_id; 
+  int pai, prox_id; 
   char texto[CHAR_SZ];
 }TARQ;
 
@@ -31,22 +30,29 @@ typedef struct lse{
   ND *prim;
 }TL;
 
-typedef TARQ* TH[TAB_SZ];
 
-void TH_insere(TH tab, TARQ *N);
-void TH_inicializa(TH tab, int m);
-void TH_imprime(TH tab);
+TL *TL_init();
+void TL_insere(TL *tab, TARQ *N);
+void TL_imprime(TL *tab);
+TARQ* TL_busca_nome(TL *tab, char nome[MAX_ARQ_SZ]);
 
-TARQ* TH_busca_nome(TH tab, char nome[MAX_ARQ_SZ]);
 TARQ *TARQ_busca(TARVB *x, int ch);
+void Salva_Node(TARVB *a, TL *tab, char *nome);
+void TARQ_imp_seq(TARVB *a, TL *tab, char *arq);
 
-TARVB *TARVB_insere_novo_node(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ], char *entry);
 TARVB *TARVB_Inicializa();
 TARVB *TARVB_Cria(int t);
 TARVB *TARVB_Libera(TARVB *a);
 TARVB *TARVB_Busca(TARVB *x, int ch);
+TARVB *TARVB_insere_teclado(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ]);
+TARVB *TARVB_insere_arquivo(TARVB *T, int t, TL *tab);
 TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N);
 //TARVB *TARVB_Retira(TARVB *arv, int k, int t);
 void TARVB_Imprime(TARVB *a);
-void Salva_Node(TARVB *a, TH tab, char *nome);
+int checa_txt(char *texto);
+
+void menu();
+void op0();
+void op1();
+void op2();
 

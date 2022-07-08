@@ -1,40 +1,73 @@
 #include "TARVB.h"
-#include <string.h>
-#include <stdio.h>
 
-
-void TH_inicializa(TH tab, int n){
-  int i;
-  for(i = 0; i < n; i++)tab[i] = NULL;
+void menu(){
+  printf("...::MENU DO USUARIO::...\n");
+  printf("NUM [-1] > Encerra o programa\n");
+  printf("NUM [ 0] > Impressoes\n");
+  printf("NUM [ 1] > Adicionar novo inode\n");
+  printf("NUM [ 2] > Imprimir tabela de inodes\n");
+  printf("NUM [ 3] > Imprimir Arvore Binaria\n");
+  printf("NUM [ 4] > Salvar iNodes em arquivos de texto\n");
+  printf("NUM [-9] > Remover um inode\n");
+  printf(".......:::::::::::.......\n");
 }
 
-TARQ* TH_busca_nome(TH tab, char nome[MAX_ARQ_SZ]){
+void op0(){
+  printf("...::OP:[0]-Impressoes::...\n");
+  printf("NUM [ 1] > Imprimir sequencia de um inode\n");
+  printf("NUM [ 2] > Imprimir tabela de inodes\n");
+  printf("NUM [ 3] > Imprimir Arvore Binaria\n");
+}
+
+void op1(){
+  printf("...::OP:[1]-Insercoes::...\n");
+  printf("NUM [ 1] > Inserir inode pelo teclado\n");
+  printf("NUM [ 2] > Inserir inode por arquivo de texto\n");
+}
+
+TARQ* TL_busca_nome(TL *tab, char nome[MAX_ARQ_SZ]){
   int i = 0;
-  while(tab[i]){
-    if(strcmp(tab[i]->nome, nome))
-      i++;
-    else break;
+  ND *lista = tab->prim;
+  while(lista){
+    if(strcmp(lista->nome, nome))
+      lista = lista->prox;
+    else return lista->info;
   }
-  return tab[i];
+  return NULL;
+  
 }
 
-void TH_insere(TH tab, TARQ *N){
-  int i=0;
-  while(tab[i]) i++;
-  tab[i] = (TARQ*)malloc(sizeof(TARQ));
-  tab[i] = N;
+void TL_imp_rec(ND *tab){
+ if(tab->prox){
+    TL_imp_rec(tab->prox);
+  }
+  if(tab->info->prox_id == -1){
+      printf("ID: %d | ID_Prox: %d | Nome: %s\n", tab->info->id, tab->info->prox_id, tab->nome);
+    }
+  else{
+    printf("ID: %d | ID_Prox: %d | Nome: %s\n", tab->info->id, tab->info->prox_id, tab->nome);  
+  }
 }
 
-void TH_imprime(TH tab){
+void TL_imprime(TL *tab){
   int i=0;
   printf("___________TABELA_INODE___________\n");
-  while(tab[i]){
-    if(tab[i]->prox_id==NULL)
-      printf("[%d] | ID: %d | ID_Proximo: -1 | Nome: %s\n", i, tab[i]->id, tab[i]->prox_id->id, tab[i]->nome);
-    else printf("[%d] | ID: %d | ID_Proximo: %d | Nome: %s\n", i, tab[i]->id, tab[i]->prox_id->id, tab[i]->nome);
-    i++;
-  } 
+  TL_imp_rec(tab->prim);
   printf("__________________________________\n");
+}
+
+TL *TL_init(){
+  TL *novo = (TL*)malloc(sizeof(TL));
+  novo->prim = NULL;
+  return novo;
+}
+
+void TL_insere(TL *l, TARQ *N){
+  ND *NO = (ND*)malloc(sizeof(ND));
+  NO->info = N;
+  strcpy(NO->nome, N->nome);
+  NO->prox = l->prim;
+  l->prim = NO;
 }
 
 TARVB *TARVB_Cria(int t){
@@ -107,20 +140,33 @@ TARVB *TARVB_Inicializa(){
   return NULL;
 }
 
-TL *TL_init(){
-  TL *novo = (TL*)malloc(sizeof(TL));
-  novo->prim = NULL;
-  return novo;
-}
-
-void TL_insere(TL *l, ND *N){
-  N->prox = l->prim;
-  l->prim = N;
-}
-
 TARQ *TARQ_aloca(){
   TARQ *novo = (TARQ*)malloc(sizeof(TARQ));
   return novo;
+}
+
+void TARQ_imp(TARVB *a, TARQ *node){
+  printf(">ID: %d \n", node->id);
+  printf("> Id Anterior: %d \n", node->pai);
+  printf("> Id Proximo : %d \n", node->prox_id);
+  printf("> Texto contido: \n [%s]\n\n", node->texto);
+  if(node->prox_id !=-1){
+    TARQ *N = TARQ_busca(a, node->prox_id);
+    TARQ_imp(a, N);
+  }
+}
+
+void TARQ_imp_seq(TARVB *a, TL *tab, char *arq){
+  ND *lista = tab->prim;
+  while(strcmp(lista->nome, arq)){
+    lista = lista->prox;
+    if(!lista){
+      printf("Nao existe nenhum inode com esse nome, verifique na tabela de inodes\n\n");
+      return;
+    }
+  }
+  printf("\n>Nome: %s\n", arq);
+  TARQ_imp(a,lista->info);
 }
 
 int Maior_id(TARVB *T){
@@ -185,9 +231,7 @@ TARVB *Insere_Nao_Completo(TARVB *x, int k, int t, TARQ *N){ // ARVB = x, k = id
 }
 
 TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N){
-  printf(".\n");
   if(TARVB_Busca(T,k)) return T;
-  printf(".\n");
   if(!T){ // 1CASO
     T=TARVB_Cria(t);
     T->info[0] = N;
@@ -217,50 +261,113 @@ TARVB *TARVB_insere_novo_node(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ], c
     for(int j=0; j<(CHAR_SZ-1); j++){
       if((i+j) < size_txt){
         novo->texto[j] = entry[i+j];
-      } else novo->texto[j] = ' ';
+      } else novo->texto[j] = '\0';
     }
     novo->texto[CHAR_SZ-1] = '\0';
     novo->id = Maior_id(T)+1;
-    novo->prox_id = NULL;
+    novo->prox_id = -1;
     strcpy(novo->nome, nome);
-    printf(".\n");
-    if(!ant)
-      TL_insere(tab, novo);
+    if(!ant){
+      TL_insere(tab, novo);    
+      novo->pai = -1;
+    }
     else if(ant){ 
-      ant->prox_id = novo;
-      novo->pai = ant;
+      ant->prox_id = novo->id;
+      novo->pai = ant->id;
     }
     ant = novo;
-    printf(".\n");
     T = TARVB_Insere(T, novo->id, t, novo);
-    printf("Adicionado na arvore > id: %d\n", novo->id);
-    printf("Info = %s\n", novo->texto);
-    
+    printf("> id: %d Adicionado na arvore\n", novo->id);
+    printf("Texto: %s \n", novo->texto);
   }
   return T;
 }
 
-void Salva_Node(TARVB *T, TH tab, char *nome){
+TARVB *TARVB_insere_node(TARVB *T, int t, TL *tab, TARQ *ant, char nome[MAX_ARQ_SZ], char *entry){
+  TARQ *novo = TARQ_aloca();
+  while(ant->prox_id!=-1) ant = TARQ_busca(T, ant->prox_id);
+  strcpy(novo->texto, entry);
+  strcpy(novo->nome, nome);
+  novo->id = Maior_id(T)+1;
+  ant->prox_id = novo->id;
+  novo->prox_id = -1;
+  novo->pai = ant->id;
+  T = TARVB_Insere(T, novo->id, t, novo);
+  printf("> id: %d Adicionado na arvore\n", novo->id);
+  printf("Texto: %s \n", novo->texto);
+  return T;
+}
+
+int checa_txt(char *texto){
+  char str1[MAX_ARQ_SZ];
+  char *str2 = ".txt";
+   for(int i = 4; i>0; i--)
+    str1[4-i] = texto[strlen(texto)-i];
+  str1[4] = '\0';
+  return strcmp(str1, str2);
+  
+}
+
+TARVB *TARVB_insere_arquivo(TARVB *T, int t, TL *tab){
+  printf("Digite o nome do arquivo a ser inserido:\n");
+  char nArq[MAX_ARQ_SZ];
+  scanf("%s", nArq);
+  if(checa_txt(nArq)){
+    printf("formato de arquivo invalido (.txt)\n");
+    return T;
+  }
+  TARQ *lista = TL_busca_nome(tab, nArq);
+  if(lista){
+    printf("Ja existe um node com esse nome! Para alterar um node ja existente use a opcao de editar\n");
+    return T;
+  }
+  FILE *fp;
+  fp = fopen(nArq, "r");
+  char texto[CHAR_SZ];
+  printf(".\n");
+  while(fread(texto, sizeof(texto)-1, 1, fp)){
+    texto[CHAR_SZ-1] = '\0';
+    printf(".\n");
+    if(!lista){
+        printf("Texto: %s\n", texto);
+      T = TARVB_insere_novo_node(T, t, tab, nArq, texto);
+      lista = TL_busca_nome(tab, nArq);
+      printf(".\n");
+    } else
+      T = TARVB_insere_node(T, t, tab, lista, nArq, texto);
+    printf(".\n");
+  }
+  fclose(fp);
+  return T;
+}
+
+TARVB *TARVB_insere_teclado(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ]){
+  printf("Digite o texto a ser inserido:\n");
+  char *entry = malloc(MAX_ENTRY_SZ);
+  fflush(stdin);
+  fgets(entry, MAX_ENTRY_SZ, stdin);
+  if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
+    entry[strlen(entry)-1]= '\0';
+  printf("\n");
+  T = TARVB_insere_novo_node(T, t, tab, nome, entry);
+}
+
+void Salva_Node(TARVB *T, TL *tab, char *nome){
+  TARQ *lista = TL_busca_nome(tab, nome);
+  if(!lista){
+    printf("Nao existe nenhum inode com esse nome, verifique na tabela de inodes\n\n");
+    return;
+  }
   char nArq[MAX_ARQ_SZ];
   strcpy(nArq,nome);
-  strcat(nArq,".txt");
-  int i =0;
   char texto[10];
-  while(strcmp(tab[i]->nome, nome)){
-      i++;
-    if(!tab[i])
-      return;
-  }
-  //char nArq[5] = ".txt";
-  //strcat(nome,nArq);
-  printf("Preparando para salvar no arquivo %s\n", nArq);
+    printf("Preparando para salvar no arquivo %s\n", nArq);
   FILE *fp = fopen(nArq, "w");
-  TARQ *node = tab[i];
+  TARQ *node = lista;
   while(node){
     strcpy(texto,node->texto);
     fwrite(texto,1,strlen(texto),fp);
-    node = TARQ_busca(T, node->prox_id->id);
-    printf(".\n");
+    node = TARQ_busca(T, node->prox_id);
   }
   fclose(fp);
   printf("Salvo\n");

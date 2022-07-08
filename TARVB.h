@@ -47,7 +47,7 @@ TARVB *TARVB_Busca(TARVB *x, int ch);
 TARVB *TARVB_insere_teclado(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ]);
 TARVB *TARVB_insere_arquivo(TARVB *T, int t, TL *tab);
 TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N);
-//TARVB *TARVB_Retira(TARVB *arv, int k, int t);
+TARVB *TARVB_Retira(TARVB *arv, int k, int t);
 void TARVB_Imprime(TARVB *a);
 int checa_txt(char *texto);
 

@@ -46,13 +46,17 @@ TARVB *TARVB_Libera(TARVB *a);
 TARVB *TARVB_Busca(TARVB *x, int ch);
 TARVB *TARVB_insere_teclado(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ]);
 TARVB *TARVB_insere_arquivo(TARVB *T, int t, TL *tab);
+TARVB *TARVB_insere_meio(TARVB *T, int t, TL *tab);
 TARVB *TARVB_Insere(TARVB *T, int k, int t, TARQ *N);
-TARVB *TARVB_Retira(TARVB *arv, int k, int t);
+TARVB* TARVB_Retira(TARVB* arv, int k, int t,TL *tab);
+TARVB *Recorta_node(TARVB *T, int t, TL *tab, int id);
+TARVB *TARVB_remove_completo(TARVB *T, int t, TL *tab);
+
 void TARVB_Imprime(TARVB *a);
 int checa_txt(char *texto);
+int Busca_info_node(TARVB *T, TL *tab, char nome[MAX_ARQ_SZ], char text[MAX_ENTRY_SZ]);
 
 void menu();
 void op0();
 void op1();
 void op2();
-

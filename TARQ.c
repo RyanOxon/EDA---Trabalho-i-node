@@ -187,12 +187,21 @@ TARVB *TARVB_Busca(TARVB* x, int ch){
 }
 
 TARQ *TARQ_busca(TARVB *x, int ch){
-  if(!x || ch == -1) return NULL;
+  if(!x){
+    //printf("subarvore vazia\n");
+    return NULL;
+  }
+  if (ch == -1) {
+    //printf("id -1\n");
+    return NULL;}
   int i = 0;
   while(i < x->nchaves && ch > x->info[i]->id) i++;
   if(i < x->nchaves && ch == x->info[i]->id) return x->info[i];
-  if(x->folha)
-   return NULL;
+  if(x->folha){
+    printf("nchaves= %d i= %d | id nao encontrada \n", x->nchaves , i);
+    return NULL;
+  }
+  //printf("procurando em outra subarvore\n");
   return TARQ_busca(x->filho[i], ch);
 }
 
@@ -316,9 +325,9 @@ TARVB *TARVB_insere_novo_node(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ], c
   TARQ *ant = NULL;
   TARQ *novo;
   int id;
-  for(int i=0; i<size_txt; i+=(CHAR_SZ)){
+  for(int i=0; i<size_txt; i+=(CHAR_SZ-1)){
     novo = TARQ_aloca();
-    for(int j=0; j<(CHAR_SZ); j++){
+    for(int j=0; j<(CHAR_SZ-1); j++){
       if((i+j) < size_txt){
         novo->texto[j] = entry[i+j];
       } else novo->texto[j] = '\0';
@@ -363,7 +372,8 @@ TARVB *TARVB_insere_meio(TARVB *T, int t, TL *tab){
   char nArq[MAX_ARQ_SZ];
   scanf("%s", nArq);
   TARQ *node = TL_busca_nome(tab, nArq);
-  TARQ *ant;
+  TARQ *ant = NULL;
+  TARQ *novo;
   if(!node){
     printf("Nenhum node com esse nome \n");
     return T;
@@ -382,29 +392,36 @@ TARVB *TARVB_insere_meio(TARVB *T, int t, TL *tab){
   }
   printf("Digite o texto a ser inserido:\n");
   char *entry = malloc(MAX_ENTRY_SZ);
-  fflush(stdin);
-  fgets(entry, MAX_ENTRY_SZ, stdin);
-  if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
-    entry[strlen(entry)-1]= '\0';
+  scanf(" %[^\n]",entry);
   printf("\n");
+  int size_txt = strlen(entry);
   if(pos){ // inserindo depois do id
     ant = node;
     node = TARQ_busca(T, node->prox_id);
   }
-  TARQ *novo = TARQ_aloca();
-  strcpy(novo->texto, entry);
-  strcpy(novo->nome, nArq);
-  novo->id = Maior_id(T)+1;
-  ant->prox_id = novo->id;
-  novo->pai = ant->id;
-  novo->prox_id = -1;
-  if(node){
-    novo->prox_id = node->id;
-    node->pai = novo->id;
+  for(int i=0; i<size_txt; i+=(CHAR_SZ-1)){
+    novo = TARQ_aloca();
+    for(int j=0; j<(CHAR_SZ-1); j++){
+      if((i+j) < size_txt){
+        novo->texto[j] = entry[i+j];
+      } else novo->texto[j] = '\0';
+    }
+    novo->texto[CHAR_SZ-1] = '\0';
+    strcpy(novo->nome, nArq);
+    novo->id = Maior_id(T)+1;
+    ant->prox_id = novo->id;
+    novo->pai = ant->id;
+    novo->prox_id = -1;
+    if(node){
+      novo->prox_id = node->id;
+      node->pai = novo->id;
+    }
+    ant = novo;
+    T = TARVB_Insere(T, novo->id, t, novo);
+    printf("> id: %d Adicionado na arvore\n", novo->id);
+    printf("Texto: %s \n", novo->texto);
+    
   }
-  T = TARVB_Insere(T, novo->id, t, novo);
-  printf("> id: %d Adicionado na arvore\n", novo->id);
-  printf("Texto: %s \n", novo->texto);
   return T;
 }
 
@@ -424,6 +441,7 @@ int Busca_info_node(TARVB *T, TL *tab, char nome[MAX_ARQ_SZ], char text[MAX_ENTR
     if(!node) return 0;
   }
   return 1;
+  
 }
 
 TARVB *TARVB_insere_arquivo(TARVB *T, int t, TL *tab){
@@ -461,10 +479,7 @@ TARVB *TARVB_insere_arquivo(TARVB *T, int t, TL *tab){
 TARVB *TARVB_insere_teclado(TARVB *T, int t, TL *tab, char nome[MAX_ARQ_SZ]){
   printf("Digite o texto a ser inserido:\n");
   char *entry = malloc(MAX_ENTRY_SZ);
-  fflush(stdin);
-  fgets(entry, MAX_ENTRY_SZ, stdin);
-  if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
-    entry[strlen(entry)-1]= '\0';
+  scanf(" %[^\n]",entry);
   printf("\n");
   T = TARVB_insere_novo_node(T, t, tab, nome, entry);
 }
@@ -496,10 +511,10 @@ void Limpa_Remocao(TARVB *a){
   for(i = 0; i <= a->nchaves; i++) a->filho[i] = NULL;
 }
 
-TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
+TARVB* remover(TARVB* T, TARVB* arv, int ch, int t, TL *tab){
   if(!arv) return arv;
   int i;
-  TARQ *aux;
+  TARQ *aux, *ant, *prox;
   printf("Removendo %d...\n", ch);
   for(i = 0; i<arv->nchaves && arv->info[i]->id < ch; i++);
   if(i < arv->nchaves && ch == arv->info[i]->id){ //CASOS 1, 2A, 2B e 2C
@@ -507,11 +522,9 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
       printf("\nCASO 1\n");
       int j;
       aux = arv->info[i];
-      for(j=i; j<arv->nchaves-1;j++)
-        arv->info[j] = arv->info[j+1];
-      TARQ *ant = TARQ_busca(arv, aux->pai);
-      TARQ *prox = TARQ_busca(arv, aux->prox_id);
-      printf("\nArrumando o inode\n");
+      ant = TARQ_busca(T, aux->pai);
+      prox = TARQ_busca(T, aux->prox_id);
+      printf("\nArrumando o inode ant: %d | prox: %d\n", aux->pai, aux->prox_id);
       if(!ant && !prox){
         printf("\nInode vazio! deletando\n");
         TL_deleta(tab, aux->nome);
@@ -522,10 +535,12 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
       } else if(!prox){
         ant->prox_id = -1;
       } else {
-        ant->prox_id = prox->id;
-        prox->pai = ant->id;
+        ant->prox_id = aux->prox_id;
+        prox->pai = aux->pai;
       }
       printf("\nInode arrumado\n");
+      for(j=i; j<arv->nchaves-1;j++)
+        arv->info[j] = arv->info[j+1];
       free(aux);
       arv->nchaves--;
       if(!arv->nchaves){ //ultima revisao: 04/2020
@@ -539,7 +554,7 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
       TARVB *y = arv->filho[i];  //Encontrar o predecessor k' de k na árvore com raiz em y
       while(!y->folha) y = y->filho[y->nchaves];
       TARQ *temp = y->info[y->nchaves-1];
-      arv->filho[i] = remover(arv->filho[i], temp->id, t, tab); 
+      arv->filho[i] = remover(T, arv->filho[i], temp->id, t, tab); 
       //Eliminar recursivamente K e substitua K por K' em x
       arv->info[i] = temp;
       return arv;
@@ -549,7 +564,7 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
       TARVB *y = arv->filho[i+1];  //Encontrar o sucessor k' de k na árvore com raiz em y
       while(!y->folha) y = y->filho[0];
       TARQ* temp = y->info[0];
-      y = remover(arv->filho[i+1], temp->id, t, tab); //Eliminar recursivamente K e substitua K por K' em x
+      y = remover(T, arv->filho[i+1], temp->id, t, tab); //Eliminar recursivamente K e substitua K por K' em x
       arv->info[i] = temp;
       return arv;
     }
@@ -580,9 +595,9 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
         arv = arv->filho[0];
         temp->filho[0] = NULL;
         TARVB_Libera(temp);
-        arv = remover(arv, ch, t, tab);
+        arv = remover(T, arv, ch, t, tab);
       }
-      else arv->filho[i] = remover(arv->filho[i], ch, t, tab);
+      else arv->filho[i] = remover(T, arv->filho[i], ch, t, tab);
       return arv;   
     }   
   }
@@ -602,7 +617,7 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
       for(j=0; j < z->nchaves; j++)       //ajustar filhos de z
         z->filho[j] = z->filho[j+1];
       z->nchaves--;
-      arv->filho[i] = remover(arv->filho[i], ch, t, tab);
+      arv->filho[i] = remover(T, arv->filho[i], ch, t, tab);
       return arv;
     }
     if((i > 0) && (!z) && (arv->filho[i-1]->nchaves >=t)){ //CASO 3A
@@ -618,7 +633,7 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
       arv->info[i-1] = z->info[z->nchaves-1];   //dar a arv uma chave de z
       y->filho[0] = z->filho[z->nchaves];         //enviar ponteiro de z para o novo elemento em y
       z->nchaves--;
-      arv->filho[i] = remover(y, ch, t, tab);
+      arv->filho[i] = remover(T, y, ch, t, tab);
       return arv;
     }
     if(!z){ //CASO 3B
@@ -651,7 +666,7 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
           temp->filho[0] = NULL;
           TARVB_Libera(temp);
         }
-        arv = remover(arv, ch, t, tab);
+        arv = remover(T, arv, ch, t, tab);
         return arv;
       }
       if((i > 0) && (arv->filho[i-1]->nchaves == t-1)){ 
@@ -683,28 +698,26 @@ TARVB* remover(TARVB* arv, int ch, int t, TL *tab){
           TARVB_Libera(temp);
         }
         else arv->filho[i-1] = z;
-        arv = remover(arv, ch, t, tab);
+        arv = remover(T, arv, ch, t, tab);
         return arv;
       }
     }
   }  
-  arv->filho[i] = remover(arv->filho[i], ch, t, tab);
+  arv->filho[i] = remover(T, arv->filho[i], ch, t, tab);
   return arv;
 }
 
 TARVB* TARVB_Retira(TARVB* arv, int k, int t,TL *tab){
   if(!arv || !TARVB_Busca(arv, k)) return arv;
-  return remover(arv, k, t, tab);
+  TARVB *T = arv;
+  return remover(T, arv, k, t, tab);
 }
 
 TARVB *Recorta_node(TARVB *T, int t, TL *tab, int id){
   printf("Digite o texto a ser recortado:\n");
   char *entry = malloc(MAX_ENTRY_SZ);
-  fflush(stdin);
-  fgets(entry, MAX_ENTRY_SZ, stdin);
-  if((strlen(entry)>0) && (entry[strlen(entry)-1]=='\n'))
-    entry[strlen(entry)-1]= '\0';
-  printf("\n");
+  scanf(" %[^\n]",entry);
+  printf("recortar: %s \n", entry);
   if(strlen(entry)>=CHAR_SZ){
     printf("Texto informado maior que a capacidade do no\n");
     return T;
@@ -720,6 +733,8 @@ TARVB *Recorta_node(TARVB *T, int t, TL *tab, int id){
   for(i = 0;i<tam;i++){
     comp[i]= node->texto[i];
   }
+  comp[tam] = '\0';
+  printf("Comparar [%s] com [%s]\n", comp, entry);
   while(strcmp(comp,entry)){
     l++;
     for(int j=0;j<tam;j++){
@@ -730,8 +745,9 @@ TARVB *Recorta_node(TARVB *T, int t, TL *tab, int id){
       printf("texto inexistente na reparticao informada\n");
       return T;
     }
+    printf("Comparar [%s] com [%s]\n", comp, entry);
   }
-  for(int k = 0; k<tam; k++){
+  for(int k = 0; k<=strlen(node->texto); k++){
     if((l+tam+k) >= CHAR_SZ){
       node->texto[l+k]= '\0';
     }
@@ -749,7 +765,6 @@ TARVB *Recorta_node(TARVB *T, int t, TL *tab, int id){
 TARVB *TARVB_remove_rec(TARVB *T, int t, TARQ *node, TL *tab){
   if(node->prox_id != -1){
     TARQ *prox = TARQ_busca(T, node->prox_id);
-    T = TARVB_Retira(T, node->id, t, tab);
     T = TARVB_remove_rec(T, t, prox, tab);
   }
   T = TARVB_Retira(T, node->id, t, tab);
@@ -761,10 +776,12 @@ TARVB *TARVB_remove_completo(TARVB *T, int t, TL *tab){
   char nArq[MAX_ARQ_SZ];
   scanf("%s", nArq);
   printf("\n");
-        if(checa_txt(nArq))
-          printf("formato nao suportado, favor usar arquivos de texto (.txt)");
+  if(checa_txt(nArq)){
+    printf("formato nao suportado, favor usar arquivos de texto (.txt)");
+    return T;
+  }
   TARQ *node = TL_busca_nome(tab, nArq);
-  TARQ *ant;
+  int aux;
   if(!node){
     printf("Nenhum node com esse nome \n");
     return T;

@@ -72,8 +72,8 @@ int main(int argc, char *argv[]){
         arvore = TARVB_insere_meio(arvore, t,tab);
       } 
       else if(num == 3){
-        arvore = TARVB_remove_completo(arvore, t, tab);
-      }
+        //arvore = TARVB_remove_completo(arvore, t, tab);
+      }    
       else if(num==4){
         printf("Digite o id do node:\n");
         int n;

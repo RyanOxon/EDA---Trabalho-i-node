@@ -1,4 +1,4 @@
 # EDA---Trabalho-I-node
 
-Apresentacao dia 13/07 => 14:00
-Sala 520
+Projeto para o curso de Estrutura de dados.
+Consiste em um sistema de i-nodes estruturado dentro de uma arvore B
